@@ -10,15 +10,16 @@ class QuotesSpider(scrapy.Spider):
     @classmethod
     def update_settings(cls, settings: BaseSettings) -> None:
         settings.set('FEED_URI', 'quotes.json', priority='spider')
+        settings.set('FEED_FOMRAT', 'json')
 
     def parse(self, response):
         for quote in response.xpath("/html//div[@class='quote']"):
             yield {
                 "tags": quote.xpath("div[@class='tags']/a/text()").extract(),
-                "author": quote.xpath("span/small/text()").extract(),
+                "author": quote.xpath("span/small/text()").get(),
                 "quote": quote.xpath("span[@class='text']/text()").get()
             }
         
-        next_page = response.xpath("//li[@class='next']/a/href").get()
-        if next_page:
-            yield scrapy.Request(url=self.start_urls[0] + next_page, callback=self.parse)
+        next_page = response.xpath("//li[@class='next']/a/@href").get()
+        if next_page is not None:
+            yield scrapy.Request(url=response.urljoin(next_page), callback=self.parse)

@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 mongoengine = "*"
 pika = "*"
-scrapy = "*"
 
 [dev-packages]
 
